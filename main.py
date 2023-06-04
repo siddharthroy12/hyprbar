@@ -12,7 +12,6 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 gi.require_version('Gtk4LayerShell', '1.0')
 
-#type: ignore
 from gi.repository import Gtk, Gdk, Adw
 from gi.repository import Gtk4LayerShell as LayerShell
 import socket
@@ -22,22 +21,26 @@ from common import Message
 import json
 import compositor
 from default_config import default_config
-import compositor
-from widgets import AppTitle, CircularProgress
-from nwg_panel.modules import sni_system_tray
+from modules.app_title import AppTitle
+from modules.circular_progress import CircularProgress
+from modules.sni_system_tray import Tray, init_tray
+from modules.workspaces import Workspaces
+
+MODULE_MAP = {
+    "workspaces": Workspaces,
+    "app_title": AppTitle,
+}
 
 class HyprbarWindow(Gtk.ApplicationWindow):
     def __init__(self, config, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.configuraiton = config
+        self.config = config
+
+        style_context = self.get_style_context()
+        fg_color = style_context.lookup_color('accent_color')[1]
+        card_bg_color = style_context.lookup_color('card_bg_color')[1]
 
         self.set_default_size(100, config["height"])
-
-        # Load the stylesheet
-        if "stylesheet" in config:
-            css_provider = Gtk.CssProvider()
-            css_provider.load_from_path(os.path.expanduser(config["stylesheet"]))
-            Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         # Setup our Lord and saviour LayerShell that
         # made this bar and widget thing possible
@@ -52,13 +55,23 @@ class HyprbarWindow(Gtk.ApplicationWindow):
         LayerShell.set_margin(self, LayerShell.Edge.RIGHT, config["margin_right"])
         LayerShell.set_margin(self, LayerShell.Edge.BOTTOM, config["margin_bottom"])
         LayerShell.auto_exclusive_zone_enable(self)
+        
+        self.setup_modules()
 
+    def setup_modules(self):
         center_box = Gtk.CenterBox()
-        button_left = Gtk.Button(label="Something on left")
-        button_right = Gtk.Button(label="Something on right")
-        center_box.set_start_widget(CircularProgress(config, 0, 0 ,0))
-        center_box.set_center_widget(AppTitle())
-        center_box.set_end_widget(sni_system_tray)
+
+        for side in ["start", "center", "end"]:
+            box = Gtk.Box()
+            box.set_orientation(Gtk.Orientation.HORIZONTAL)
+            for module in self.config[f"{side}_modules"]:
+                if module in MODULE_MAP:
+                    widget_of_module = MODULE_MAP[module]
+                    box.append(widget_of_module(self.config, self))
+
+            set_side_widget = getattr(center_box, f'set_{side}_widget')
+            set_side_widget(box)
+
         self.set_child(center_box)
 
 class Hyprbar(Adw.Application):

@@ -85,6 +85,7 @@ class StatusNotifierItem(object):
             try:
                 self.properties[name] = getattr(self.item_proxy, name)
             except (AttributeError, DBusError):
+                print("remote StatusNotifierItem object does not support all SNI properties")
                 # remote StatusNotifierItem object does not support all SNI properties
                 pass
         if self.on_loaded_callback is not None:
@@ -126,13 +127,13 @@ class StatusNotifierItem(object):
         else:
             return False
 
-    def context_menu(self, event: Gdk.EventButton):
+    def context_menu(self, event):
         self.item_proxy.ContextMenu(event.x, event.y)
 
-    def activate(self, event: Gdk.EventButton):
+    def activate(self, event):
         self.item_proxy.Activate(event.x, event.y)
 
-    def secondary_action(self, event: Gdk.EventButton):
+    def secondary_action(self, event):
         self.item_proxy.SecondaryAction(event.x, event.y)
 
     def scroll(self, distance, direction):

@@ -1,30 +1,29 @@
 import typing
 import gi
 
-gi.require_version("Gtk", "3.0")
-gi.require_version("DbusmenuGtk3", "0.4")
+gi.require_version("Gtk", "4.0")
 
-from gi.repository import Gdk, Gtk, DbusmenuGtk3
+from gi.repository import Gdk, Gtk
 
 from dasbus.connection import SessionMessageBus
 from dasbus.client.observer import DBusObserver
 
 
 class Menu(object):
-    def __init__(self, service_name, object_path, settings, event_box: Gtk.EventBox, item):
+    def __init__(self, service_name, object_path, settings, event_box: Gtk.Box, item):
         self.service_name = service_name
         self.object_path = object_path
         self.settings = settings
         self.event_box = event_box
         self.item = item
         self.session_bus = SessionMessageBus()
-        self.menu_widget: typing.Union[None, DbusmenuGtk3.Menu] = None
+        self.menu_widget: typing.Union[None] = None
 
         self.distance_scrolled_x = 0
         self.distance_scrolled_y = 0
 
         self.event_box.connect("button-press-event", self.button_press_event_handler)
-        self.event_box.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK)
+        #self.event_box.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK)
         self.event_box.connect("scroll-event", self.scroll_event_handler)
 
         self.menu_observer = DBusObserver(
@@ -44,14 +43,14 @@ class Menu(object):
         self.session_bus.disconnect()
 
     def menu_available_handler(self, _observer):
-        """print(
+        print(
             "Menu -> menu_available_handler: Connecting to menu over dbus:\n"
             "  service_name: {}\n"
             "  object_path: {}".format(
                 self.service_name,
                 self.object_path
             )
-        )"""
+        )
         self.menu_widget = DbusmenuGtk3.Menu().new(
             dbus_name=self.service_name,
             dbus_object=self.object_path
@@ -61,7 +60,7 @@ class Menu(object):
     def menu_unavailable_handler(self, _observer):
         self.event_box.disconnect_by_func(self.button_press_event_handler)
 
-    def button_press_event_handler(self, _w, event: Gdk.EventButton):
+    def button_press_event_handler(self, _w, event):
         if (event.button == 1 and self.item.item_is_menu) or event.button == 3:
             if self.menu_widget is not None:
                 self.menu_widget.popup_at_widget(
@@ -77,7 +76,7 @@ class Menu(object):
         elif event.button == 2:
             self.item.secondary_action(event)
 
-    def scroll_event_handler(self, _w, event: Gdk.EventScroll):
+    def scroll_event_handler(self, _w, event):
         dx = 0
         dy = 0
         if event.direction == Gdk.ScrollDirection.UP:

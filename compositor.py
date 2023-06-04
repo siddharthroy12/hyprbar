@@ -6,8 +6,6 @@ import socket
 import threading
 from common import Message
 
-# Command line functions
-
 # Get active window title
 def get_active_window_title():
     return json.loads(run_command("hyprctl activewindow -j"))["title"]
@@ -24,7 +22,7 @@ def get_active_workspace():
 # Messages for compositor properties
 active_window_title = Message(get_active_window_title())
 workspaces = Message(get_workspaces())
-active_workspaces = Message(get_active_workspace())
+active_workspace = Message(get_active_workspace())
 
 
 # Connect to hyprlaond socket to get info like changing window and workspace
@@ -52,7 +50,21 @@ def read_hyprland_socket(sock):
                 data = data.decode()
                 for line in data.split('\n'):
                     if line.startswith("activewindow>>"):
-                        active_window_title.set_value(line[14:-1].replace(",", " - "))
+                        active_window_title.set_value(line[14:].replace(",", " - ").replace("\n", ""))
+                    if line.startswith("workspace>>"):
+                        active_workspace.set_value(int(line[11:]))
+                    if line.startswith("createworkspace>>"):
+                        new_list = workspaces.get_value()
+                        new_list.append(int(line[17:]))
+                        new_list.sort()
+                        workspaces.set_value(new_list)
+                    if line.startswith("destroyworkspace>>"):
+                        new_list = workspaces.get_value()
+                        new_list.remove(int(line[18:]))
+                        new_list.sort()
+                        workspaces.set_value(new_list)
+
+
         except socket.error as e:
             print("Socket error:", e)
 

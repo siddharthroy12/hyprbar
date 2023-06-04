@@ -2,13 +2,52 @@ import os
 import sys
 import gi
 
-gi.require_version("Gtk", "3.0")
-
 from gi.repository import Gtk, Gdk, GLib, GdkPixbuf
 
-from nwg_panel.tools import check_key, create_pixbuf
 from .item import StatusNotifierItem
 from .menu import Menu
+
+def check_key(dictionary, key, default_value):
+    """
+    Adds a key w/ default value if missing from the dictionary
+    """
+    if key not in dictionary:
+        dictionary[key] = default_value
+
+def create_pixbuf(icon_name, icon_size, icons_path="", fallback=True):
+    try:
+        # In case a full path was given
+        if icon_name.startswith("/"):
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                icon_name, icon_size, icon_size)
+        else:
+            icon_theme = Gtk.IconTheme.get_default()
+            if icons_path:
+                search_path = icon_theme.get_search_path()
+                search_path.append(icons_path)
+                icon_theme.set_search_path(search_path)
+
+            try:
+                if icons_path:
+                    path = "{}/{}.svg".format(icons_path, icon_name)
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                        path, icon_size, icon_size)
+                else:
+                    raise ValueError("icons_path not supplied.")
+            except:
+                try:
+                    pixbuf = icon_theme.load_icon(icon_name, icon_size, Gtk.IconLookupFlags.FORCE_SIZE)
+                except:
+                    pixbuf = icon_theme.load_icon(icon_name.lower(), icon_size, Gtk.IconLookupFlags.FORCE_SIZE)
+    except Exception as e:
+        if fallback:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_size(
+                os.path.join(get_config_dir(), "icons_light/icon-missing.svg"), icon_size, icon_size)
+        else:
+            raise e
+    return pixbuf
+
+
 
 
 def resize_pix_buf(image, pixbuf, icon_size):
@@ -95,12 +134,12 @@ def update_status(event_box, item):
         event_box_style.add_class(status)
 
 
-class Tray(Gtk.EventBox):
+class Tray(Gtk.Box):
     def __init__(self, settings, panel_position, icons_path=""):
         self.menu = None
         self.settings = settings
         self.icons_path = icons_path
-        Gtk.EventBox.__init__(self)
+        super().__init__()
 
         check_key(settings, "icon-size", 16)
         check_key(settings, "root-css-name", "tray")
@@ -115,15 +154,15 @@ class Tray(Gtk.EventBox):
         if panel_position in ["left", "right"]:
             self.box.set_orientation(Gtk.Orientation.VERTICAL)
         self.box.set_property("name", settings["inner-css-name"])
-        self.add(self.box)
+        #self.add(self.box)
 
         self.items = {}
 
     def add_item(self, item: StatusNotifierItem):
-        # print("Tray -> add_item: {}".format(item.properties))
+        print("Tray -> add_item: {}".format(item.properties))
         full_service_name = "{}{}".format(item.service_name, item.object_path)
         if full_service_name not in self.items:
-            event_box = Gtk.EventBox()
+            event_box = Gtk.Box()
             image = Gtk.Image()
 
             if "IconName" in item.properties and len(item.properties['IconName']) > 0:
