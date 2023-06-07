@@ -19,6 +19,9 @@ def get_workspaces():
 def get_active_workspace():
     return json.loads(run_command("hyprctl activeworkspace -j"))["id"]
 
+def set_active_workspace(workspace):
+    return run_command(f"hyprctl dispatch workspace {workspace}")
+
 # Messages for compositor properties
 active_window_title = Message(get_active_window_title())
 workspaces = Message(get_workspaces())

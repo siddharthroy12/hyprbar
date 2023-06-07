@@ -25,10 +25,12 @@ from modules.app_title import AppTitle
 from modules.circular_progress import CircularProgress
 from modules.sni_system_tray import Tray, init_tray
 from modules.workspaces import Workspaces
+from modules.calendar import Calendar
 
 MODULE_MAP = {
     "workspaces": Workspaces,
     "app_title": AppTitle,
+    "calendar": Calendar
 }
 
 class HyprbarWindow(Gtk.ApplicationWindow):
@@ -39,6 +41,7 @@ class HyprbarWindow(Gtk.ApplicationWindow):
         style_context = self.get_style_context()
         fg_color = style_context.lookup_color('accent_color')[1]
         card_bg_color = style_context.lookup_color('card_bg_color')[1]
+        self.css_provider = None
 
         self.set_default_size(100, config["height"])
 
@@ -56,8 +59,25 @@ class HyprbarWindow(Gtk.ApplicationWindow):
         LayerShell.set_margin(self, LayerShell.Edge.BOTTOM, config["margin_bottom"])
         LayerShell.auto_exclusive_zone_enable(self)
         
+        self.set_style()
         self.setup_modules()
 
+    def set_style(self):
+        if self.css_provider != None:
+            self.get_style_context().remove_provider(self.provider)
+
+        css_provider = Gtk.CssProvider()
+        css = f"""
+        window.background {{
+            border-radius: {self.config["bar_radius"]}px;
+        }}
+        """
+        css_provider.load_from_data(css, len(css))
+        self.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self.provider = css_provider
+
+    # Setup left, right, center modules
+    # If it's already setup then it'll reload it
     def setup_modules(self):
         center_box = Gtk.CenterBox()
 
