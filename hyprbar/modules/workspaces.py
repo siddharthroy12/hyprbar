@@ -12,17 +12,22 @@ class WorkspacesDrawingArea(Gtk.DrawingArea):
         self.spacing = 10
         self.workspaces = []
         self.active_workspace = 1
+
         self.set_draw_func(self.on_draw)
+
         compositor.workspaces.add_listener(self.on_workspaces_change)
         compositor.active_workspace.add_listener(
             self.on_active_workspace_change)
-
         self.on_workspaces_change(self.workspaces)
+
         gesture = Gtk.GestureClick.new()
         gesture.connect("pressed", self.on_mouse_click)
         self.add_controller(gesture)
 
     def on_mouse_click(self, gesture_click, times, x, y):
+        """
+        Detect mouse click on dots and change workspace
+        """
         height = self.get_height()
 
         c_y = height / 2.0
@@ -34,6 +39,10 @@ class WorkspacesDrawingArea(Gtk.DrawingArea):
                 compositor.set_active_workspace(workspace)
 
     def on_active_workspace_change(self, active_workspace):
+        """
+        Set active workspace to render and render is after sometime
+        to avoid glitchy effect when switching from a empty workspace
+        """
         self.active_workspace = active_workspace
 
         def after_sometime():
@@ -42,6 +51,9 @@ class WorkspacesDrawingArea(Gtk.DrawingArea):
         GObject.timeout_add(100, after_sometime)
 
     def on_workspaces_change(self, workspaces):
+        """
+        Change width of the widget whenever a workspace is added or removed
+        """
         self.workspaces = workspaces
 
         def after_sometime():
@@ -52,10 +64,6 @@ class WorkspacesDrawingArea(Gtk.DrawingArea):
             self.queue_draw()
 
         GObject.timeout_add(100, after_sometime)
-
-    def set_progress(self, progress):
-        self.progress = progress
-        self.queue_draw()
 
     def draw_circle(self, cr, r, x, y):
         color = (225, 225, 225)
