@@ -25,7 +25,6 @@ def add_css_to_widget(widget, css):
     widget.get_style_context().add_provider(
         css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
     )
-
     return css_provider
 
 
@@ -43,6 +42,7 @@ class Message:
         return self._value
 
     def set_value(self, value):
-        for listiner in self.listiners:
-            listiner(value)
-        self._value = value
+        if (self._value != value):
+            for listiner in self.listiners:
+                listiner(value)
+            self._value = value

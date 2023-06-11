@@ -6,12 +6,13 @@ from hyprbar.common import is_point_in_circle
 
 
 class WorkspacesDrawingArea(Gtk.DrawingArea):
-    def __init__(self, config):
+    def __init__(self, config, window):
         super().__init__()
         self.circle_size = 5
         self.spacing = 10
         self.workspaces = []
         self.active_workspace = 1
+        self.circle_color = window.get_style_color("window_fg_color")
 
         self.set_draw_func(self.on_draw)
 
@@ -66,15 +67,17 @@ class WorkspacesDrawingArea(Gtk.DrawingArea):
         GObject.timeout_add(100, after_sometime)
 
     def draw_circle(self, cr, r, x, y):
-        color = (225, 225, 225)
+        color = (
+            self.circle_color.red,
+            self.circle_color.green,
+            self.circle_color.blue
+        )
         cr.new_sub_path()
         cr.set_source_rgb(*color)
         cr.arc(x, y, r, 0, 2.0 * PI)
         cr.stroke()
 
     def on_draw(self, area, cr, width, height):
-        cr.set_source_rgb(225, 225, 225)
-
         center_y = height / 2.0
 
         for index, workspace in enumerate(self.workspaces):
@@ -88,5 +91,5 @@ class WorkspacesDrawingArea(Gtk.DrawingArea):
 class Workspaces(ModuleContainer):
     def __init__(self, config, window):
         super().__init__(config, window)
-        widget = WorkspacesDrawingArea(config)
+        widget = WorkspacesDrawingArea(config, window)
         self.set_child(widget)

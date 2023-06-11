@@ -10,7 +10,7 @@ class ModuleContainer(Gtk.Box):
         self.config = config
         self.window = window
         self.container.get_style_context().add_class("module-container")
-        self.background = self.get_style_color("card_bg_color")
+        self.background = window.get_style_color("headerbar_bg_color")
         self.padding_x = 10
         self.padding_y = 0
         self.css_provider = None
@@ -24,10 +24,10 @@ class ModuleContainer(Gtk.Box):
 
         css = f"""
         .module-container {{
-            background: rgba({self.background.red*255},
-                        {self.background.green*255},
-                        {self.background.blue*255},
-                        {self.background.alpha});
+            background: rgba({255},
+                        {255},
+                        {255},
+                        0.08);
             border-radius: {self.config["module_radius"]}px;
             padding: {self.padding_y}px {self.padding_x}px;
             margin: 5px;
@@ -35,10 +35,6 @@ class ModuleContainer(Gtk.Box):
         """
 
         self.css_provider = add_css_to_widget(self.container, css)
-
-    def get_style_color(self, color):
-        style_context = self.window.get_style_context()
-        return style_context.lookup_color(color)[1]
 
     def set_child(self, child):
         if self.is_button:

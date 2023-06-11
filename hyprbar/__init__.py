@@ -71,9 +71,15 @@ class HyprbarWindow(Gtk.ApplicationWindow):
 
 
         css_provider = Gtk.CssProvider()
+        bar_background_color = self.get_style_color("headerbar_bg_color")
+
         css = f"""
         window.background {{
             border-radius: {self.config["bar_radius"]}px;
+            background: rgb({bar_background_color.red*255}, {bar_background_color.green*255}, {bar_background_color.blue*255});
+        }}
+        calendar {{
+            background: rgba(0, 0, 0, 0.2);
         }}
         calendar.view {{
             border: none;
@@ -126,6 +132,12 @@ class HyprbarWindow(Gtk.ApplicationWindow):
             set_side_widget(box)
 
         self.set_child(center_box)
+
+    def get_style_color(self, color):
+        style_context = self.get_style_context()
+        return style_context.lookup_color(color)[1]
+
+
 
 
 class Hyprbar(Adw.Application):
