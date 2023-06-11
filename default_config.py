@@ -9,5 +9,5 @@ default_config = {
     "module_radius": 3,
     "start_modules": ["workspaces", "app_title"],
     "center_modules": ["calendar"],
-    "end_modules": []
+    "end_modules": ["system_status", "power_menu"]
 }

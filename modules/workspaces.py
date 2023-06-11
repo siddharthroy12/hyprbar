@@ -73,6 +73,6 @@ class Workspaces(ModuleContainer):
     def __init__(self, config, window):
         super().__init__(config, window)
         widget = WorkspacesDrawingArea(config)
-        self.append(widget)
+        self.set_child(widget)
 
 

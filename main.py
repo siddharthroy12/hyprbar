@@ -16,6 +16,7 @@ from gi.repository import Gtk, Gdk, Adw
 from gi.repository import Gtk4LayerShell as LayerShell
 import socket
 import os
+from datetime import datetime
 import threading
 from common import Message
 import json
@@ -26,11 +27,15 @@ from modules.circular_progress import CircularProgress
 from modules.sni_system_tray import Tray, init_tray
 from modules.workspaces import Workspaces
 from modules.calendar import Calendar
+from modules.system_status import SystemStatus
+from modules.power_menu import PowerMenu
 
 MODULE_MAP = {
     "workspaces": Workspaces,
     "app_title": AppTitle,
-    "calendar": Calendar
+    "calendar": Calendar,
+    "system_status": SystemStatus,
+    "power_menu": PowerMenu
 }
 
 class HyprbarWindow(Gtk.ApplicationWindow):
@@ -71,6 +76,9 @@ class HyprbarWindow(Gtk.ApplicationWindow):
         window.background {{
             border-radius: {self.config["bar_radius"]}px;
         }}
+        button {{
+            border: 1px solid white;
+            }}
         """
         css_provider.load_from_data(css, len(css))
         self.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
@@ -82,8 +90,7 @@ class HyprbarWindow(Gtk.ApplicationWindow):
         center_box = Gtk.CenterBox()
 
         for side in ["start", "center", "end"]:
-            box = Gtk.Box()
-            box.set_orientation(Gtk.Orientation.HORIZONTAL)
+            box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
             for module in self.config[f"{side}_modules"]:
                 if module in MODULE_MAP:
                     widget_of_module = MODULE_MAP[module]
@@ -105,6 +112,14 @@ class Hyprbar(Adw.Application):
         self.win.present()
 
 
+def background_thread():
+    socket = compositor.connect_to_hyprland_socket()
+
+    while True:
+        compositor.read_hyprland_socket(socket)
+
+
+
 if __name__ == "__main__":
     config = default_config
     config_path = "~/.config/hyprbar/config.json"
@@ -117,6 +132,11 @@ if __name__ == "__main__":
         except:
             print(f"Failed to load config from {config_path}, using default config");
     print(config)
+    # Starting background thread
+    thread = threading.Thread(target=background_thread)
+    thread.daemon = True
+    thread.start()
+
     app = Hyprbar(config, application_id='com.github.wmww.gtk4-layer-shell.py-example')
     app.run(None)
 

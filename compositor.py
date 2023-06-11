@@ -6,6 +6,9 @@ import socket
 import threading
 from common import Message
 
+# Track if selection layer was just closed
+selection_was_closed = False
+
 # Get active window title
 def get_active_window_title():
     return json.loads(run_command("hyprctl activewindow -j"))["title"]
@@ -39,21 +42,20 @@ def connect_to_hyprland_socket():
 
     # Connect to the socket file
     sock.connect(f"/tmp/hypr/{his}/.socket2.sock")
-    
-    # To anyone reading this if there is some other way that will have less cpu usage please let me know
-    thread = threading.Thread(target=read_hyprland_socket, args=(sock,))
-    thread.daemon = True
-    thread.start()
+
+    return sock
 
 def read_hyprland_socket(sock):
-    while True:
-        try:
-            data = sock.recv(1024) # Got this number from ChatGPT
-            if data:
-                data = data.decode()
-                for line in data.split('\n'):
+    global selection_was_closed
+    try:
+        data = sock.recv(1024) # Got this number from ChatGPT
+        if data:
+            data = data.decode()
+            for line in data.split('\n'):
+                if line != "":
                     if line.startswith("activewindow>>"):
-                        active_window_title.set_value(line[14:].replace(",", " - ").replace("\n", ""))
+                        if not selection_was_closed:
+                            active_window_title.set_value(line[14:].split(",")[0])
                     if line.startswith("workspace>>"):
                         active_workspace.set_value(int(line[11:]))
                     if line.startswith("createworkspace>>"):
@@ -66,9 +68,13 @@ def read_hyprland_socket(sock):
                         new_list.remove(int(line[18:]))
                         new_list.sort()
                         workspaces.set_value(new_list)
+                    # To fix the empty app title during screenshot using hyprshot
+                    # do not update app title when the selection has just stopped
+                    if line == "closelayer>>selection":
+                        selection_was_closed = True
+                    else:
+                        selection_was_closed = False
 
 
-        except socket.error as e:
-            print("Socket error:", e)
-
-connect_to_hyprland_socket()
+    except socket.error as e:
+        print("Socket error:", e)
