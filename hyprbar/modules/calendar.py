@@ -1,5 +1,5 @@
 from gi.repository import Gtk, GLib
-from widgets.module_container import ModuleContainer
+from hyprbar.widgets.module_container import ModuleContainer
 from datetime import datetime
 
 

@@ -17,13 +17,13 @@ from gi.repository import Gtk4LayerShell as LayerShell
 import os
 import threading
 import json
-import compositor
-from default_config import default_config
-from modules.app_title import AppTitle
-from modules.workspaces import Workspaces
-from modules.calendar import Calendar
-from modules.system_status import SystemStatus
-from modules.power_menu import PowerMenu
+import hyprbar.compositor as compositor
+from hyprbar.default_config import default_config
+from hyprbar.modules.app_title import AppTitle
+from hyprbar.modules.workspaces import Workspaces
+from hyprbar.modules.calendar import Calendar
+from hyprbar.modules.system_status import SystemStatus
+from hyprbar.modules.power_menu import PowerMenu
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")

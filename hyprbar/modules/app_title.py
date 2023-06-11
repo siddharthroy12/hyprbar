@@ -1,6 +1,6 @@
 from gi.repository import Gtk
-import compositor
-from widgets.module_container import ModuleContainer
+import hyprbar.compositor as compositor
+from hyprbar.widgets.module_container import ModuleContainer
 
 
 class AppTitle(ModuleContainer):

@@ -1,9 +1,9 @@
 # This file contains functions to interact with compositor
 import json
-from common import run_command
 import os
 import socket
-from common import Message
+from hyprbar.common import run_command
+from hyprbar.common import Message
 
 # Track if selection layer was just closed
 selection_was_closed = False

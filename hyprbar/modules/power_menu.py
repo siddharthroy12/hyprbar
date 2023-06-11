@@ -1,6 +1,6 @@
 from gi.repository import Gtk
-from widgets.module_container import ModuleContainer
-from common import run_command
+from hyprbar.widgets.module_container import ModuleContainer
+from hyprbar.common import run_command
 
 OPTIONS = [
     {

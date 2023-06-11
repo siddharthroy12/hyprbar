@@ -1,8 +1,8 @@
 from gi.repository import Gtk, GObject
 from math import pi as PI
-from widgets.module_container import ModuleContainer
-import compositor
-from common import is_point_in_circle
+from hyprbar.widgets.module_container import ModuleContainer
+import hyprbar.compositor as compositor
+from hyprbar.common import is_point_in_circle
 
 
 class WorkspacesDrawingArea(Gtk.DrawingArea):
