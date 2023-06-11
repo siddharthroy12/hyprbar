@@ -1,10 +1,14 @@
-import gi
-gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk
 from math import pi as PI
+from gi.repository import Gtk
+import gi
+
+gi.require_version("Gtk", "4.0")
+
 
 class CircularProgress(Gtk.DrawingArea):
-    def __init__(self, config, progress, radius=5, stroke_width=2, color=(225, 225, 225)):
+    def __init__(
+        self, config, progress, radius=5, stroke_width=2, color=(225, 225, 225)
+    ):
         super().__init__()
 
         self.radius = radius
@@ -15,7 +19,6 @@ class CircularProgress(Gtk.DrawingArea):
         self.set_content_width(config["height"])
         self.set_content_height(config["height"])
         self.set_draw_func(self.on_draw)
-
 
     def set_progress(self, progress):
         self.progress = progress
@@ -31,5 +34,4 @@ class CircularProgress(Gtk.DrawingArea):
         end_angle = (self.progress / 100.0) * 2.0 * PI
 
         cr.arc(center_x, center_y, self.radius, start_angle, end_angle)
-        cr.stroke() 
-
+        cr.stroke()

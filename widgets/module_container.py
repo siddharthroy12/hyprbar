@@ -1,5 +1,5 @@
 from gi.repository import Gtk
-import compositor
+
 
 class ModuleContainer(Gtk.Box):
     def __init__(self, config, window, is_button=False):
@@ -15,22 +15,28 @@ class ModuleContainer(Gtk.Box):
         self.css_provider = None
         self.set_style()
         self.append(self.container)
-    
+
     def set_style(self):
-        if self.css_provider != None:
-            self.container.get_style_context().remove_provider(self.css_provider)
+        if self.css_provider is not None:
+            self.container.get_style_context()\
+                .remove_provider(self.css_provider)
 
         css_provider = Gtk.CssProvider()
         css = f"""
         .module-container {{
-            background: rgba({self.background.red*255}, {self.background.green*255}, {self.background.blue*255}, {self.background.alpha});
+            background: rgba({self.background.red*255},
+                        {self.background.green*255},
+                        {self.background.blue*255},
+                        {self.background.alpha});
             border-radius: {self.config["module_radius"]}px;
             padding: {self.padding_y}px {self.padding_x}px;
             margin: 5px;
         }}
         """
         css_provider.load_from_data(css, len(css))
-        self.container.get_style_context().add_provider(css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self.container.get_style_context().add_provider(
+            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
         self.css_provider = css_provider
 
     def get_style_color(self, color):
@@ -42,4 +48,3 @@ class ModuleContainer(Gtk.Box):
             self.container.set_child(child)
         else:
             self.container.append(child)
-
