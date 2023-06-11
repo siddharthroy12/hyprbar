@@ -14,7 +14,7 @@ CDLL("libgtk4-layer-shell.so")
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 
-from gi.repository import Gtk, Adw
+from gi.repository import Gtk, Adw, Gdk
 from gi.repository import Gtk4LayerShell as LayerShell
 import os
 import threading
@@ -69,18 +69,44 @@ class HyprbarWindow(Gtk.ApplicationWindow):
         if self.css_provider is not None:
             self.get_style_context().remove_provider(self.provider)
 
+
         css_provider = Gtk.CssProvider()
         css = f"""
         window.background {{
             border-radius: {self.config["bar_radius"]}px;
         }}
-        button {{
-            border: 1px solid white;
-            }}
+        calendar.view {{
+            border: none;
+            border-radius: 10px;
+            padding: 20px 20px;
+        }}
+        calendar.view header {{
+            border: none;
+        }}
+
+        calendar grid label {{
+            border-radius: 100px;
+            padding: 9px 0;
+        }}
+
+        calendar button {{
+            border-radius: 100px;
+        }}
+
+        .big-date-time {{
+            font-size: 60px;
+            margin-bottom: 5px;
+            margin-top: 20px;
+        }}
+
+        .full-date {{
+            margin-bottom: 30px;
+        }}
         """
+
         css_provider.load_from_data(css, len(css))
-        self.get_style_context().add_provider(
-            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        self.get_style_context().add_provider_for_display(
+            Gdk.Display.get_default(), css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
         self.provider = css_provider
 
