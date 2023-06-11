@@ -1,4 +1,5 @@
 from gi.repository import Gtk
+from hyprbar.common import add_css_to_widget
 
 
 class ModuleContainer(Gtk.Box):
@@ -21,7 +22,6 @@ class ModuleContainer(Gtk.Box):
             self.container.get_style_context()\
                 .remove_provider(self.css_provider)
 
-        css_provider = Gtk.CssProvider()
         css = f"""
         .module-container {{
             background: rgba({self.background.red*255},
@@ -33,11 +33,8 @@ class ModuleContainer(Gtk.Box):
             margin: 5px;
         }}
         """
-        css_provider.load_from_data(css, len(css))
-        self.container.get_style_context().add_provider(
-            css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
-        self.css_provider = css_provider
+
+        self.css_provider = add_css_to_widget(self.container, css)
 
     def get_style_color(self, color):
         style_context = self.window.get_style_context()

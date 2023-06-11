@@ -35,7 +35,7 @@ class WorkspacesDrawingArea(Gtk.DrawingArea):
         for index, workspace in enumerate(self.workspaces):
             c_x = index * (self.circle_size * 2 +
                            self.spacing) + self.circle_size + 2
-            if is_point_in_circle(x, y, c_x, c_y, self.circle_size):
+            if is_point_in_circle(x, y, c_x, c_y, self.circle_size+3):
                 compositor.set_active_workspace(workspace)
 
     def on_active_workspace_change(self, active_workspace):

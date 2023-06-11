@@ -17,12 +17,14 @@ def get_active_window_title():
 # Get workspaces
 def get_workspaces():
     workspace_list = json.loads(run_command("hyprctl workspaces -j"))
-    return [entry["id"] for entry in workspace_list]
+    workspace_list = [int(entry["id"]) for entry in workspace_list]
+    workspace_list.sort()
+    return workspace_list
 
 
 # Get active worksapce
 def get_active_workspace():
-    return json.loads(run_command("hyprctl activeworkspace -j"))["id"]
+    return int(json.loads(run_command("hyprctl activeworkspace -j"))["id"])
 
 
 def set_active_workspace(workspace):

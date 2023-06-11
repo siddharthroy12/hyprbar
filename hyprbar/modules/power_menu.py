@@ -54,7 +54,7 @@ class PowerMenu(ModuleContainer):
         self.popover.set_has_arrow(False)
         self.popover.set_offset(-42, 8)
         self.popover.set_parent(self.container)
-        self.container.connect("clicked", self.on_realize)
+        self.container.connect("clicked", self.on_click)
 
-    def on_realize(self, window):
+    def on_click(self, window):
         self.popover.popup()

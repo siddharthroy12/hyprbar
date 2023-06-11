@@ -11,6 +11,8 @@ from ctypes import CDLL
 gi.require_version("Gtk4LayerShell", "1.0")
 CDLL("libgtk4-layer-shell.so")
 
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
 
 from gi.repository import Gtk, Adw
 from gi.repository import Gtk4LayerShell as LayerShell
@@ -24,9 +26,6 @@ from hyprbar.modules.workspaces import Workspaces
 from hyprbar.modules.calendar import Calendar
 from hyprbar.modules.system_status import SystemStatus
 from hyprbar.modules.power_menu import PowerMenu
-
-gi.require_version("Gtk", "4.0")
-gi.require_version("Adw", "1")
 
 
 MODULE_MAP = {

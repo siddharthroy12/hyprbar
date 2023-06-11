@@ -1,5 +1,6 @@
 import subprocess
 import math
+from gi.repository import Gtk
 
 
 # Run command and return output
@@ -16,6 +17,16 @@ def is_point_in_circle(
         (point_x - circle_center_x) ** 2 + (point_y - circle_center_y) ** 2
     )
     return distance <= circle_radius
+
+
+def add_css_to_widget(widget, css):
+    css_provider = Gtk.CssProvider()
+    css_provider.load_from_data(css, len(css))
+    widget.get_style_context().add_provider(
+        css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+    )
+
+    return css_provider
 
 
 # PUB/SUB
