@@ -22,12 +22,14 @@ class ModuleContainer(Gtk.Box):
             self.container.get_style_context()\
                 .remove_provider(self.css_provider)
 
+        background = self.window.get_style_color("window_bg_color")
+
         css = f"""
         .module-container {{
-            background: rgba({255},
-                        {255},
-                        {255},
-                        0.08);
+            background: rgba({background.red*255},
+                        {background.green*255},
+                        {background.blue*255},
+                        {background.alpha});
             border-radius: {self.config["module_radius"]}px;
             padding: {self.padding_y}px {self.padding_x}px;
             margin: 5px;

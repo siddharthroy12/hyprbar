@@ -24,7 +24,7 @@ from hyprbar.default_config import default_config
 from hyprbar.modules.app_title import AppTitle
 from hyprbar.modules.workspaces import Workspaces
 from hyprbar.modules.calendar import Calendar
-from hyprbar.modules.system_status import SystemStatus
+from hyprbar.modules.quick_settings import QuickSettings
 from hyprbar.modules.power_menu import PowerMenu
 
 
@@ -32,7 +32,7 @@ MODULE_MAP = {
     "workspaces": Workspaces,
     "app_title": AppTitle,
     "calendar": Calendar,
-    "system_status": SystemStatus,
+    "quick_settings": QuickSettings,
     "power_menu": PowerMenu,
 }
 

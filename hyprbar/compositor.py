@@ -67,12 +67,12 @@ def read_hyprland_socket(sock):
                     if line.startswith("workspace>>"):
                         active_workspace.set_value(int(line[11:]))
                     if line.startswith("createworkspace>>"):
-                        new_list = workspaces.get_value()
+                        new_list = [*workspaces.get_value()]
                         new_list.append(int(line[17:]))
                         new_list.sort()
                         workspaces.set_value(new_list)
                     if line.startswith("destroyworkspace>>"):
-                        new_list = workspaces.get_value()
+                        new_list = [*workspaces.get_value()]
                         new_list.remove(int(line[18:]))
                         new_list.sort()
                         workspaces.set_value(new_list)

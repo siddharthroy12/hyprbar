@@ -3,7 +3,7 @@ from hyprbar.widgets.module_container import ModuleContainer
 from hyprbar import system
 
 
-class SystemStatus(ModuleContainer):
+class QuickSettings(ModuleContainer):
     def __init__(self, config, window):
         super().__init__(config, window, is_button=True)
         system.battery.add_listener(lambda value: print(value))

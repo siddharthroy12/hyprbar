@@ -1,6 +1,6 @@
 import subprocess
 import math
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 
 # Run command and return output
@@ -32,17 +32,17 @@ def add_css_to_widget(widget, css):
 class Message:
     def __init__(self, initialValue):
         self._value = initialValue
-        self.listiners = []
+        self.listeners = []
 
     def add_listener(self, callback):
-        self.listiners.append(callback)
-        callback(self._value)
+        self.listeners.append(callback)
+        GLib.idle_add(callback, self._value)
 
     def get_value(self):
         return self._value
 
     def set_value(self, value):
         if (self._value != value):
-            for listiner in self.listiners:
-                listiner(value)
+            for listener in self.listeners:
+                GLib.idle_add(listener, value)
             self._value = value
