@@ -1,4 +1,0 @@
-[tool.pyright]
-useLibraryCodeForTypes = true
-defineConstant = { DEBUG = true }
-
