@@ -1,6 +1,7 @@
 use crate::compositor::{Compositor, CompositorInput, CompositorOutput};
 use crate::config::BarPosition;
-use crate::modules::workspaces::{Workspaces, WorkspacesConfig};
+use crate::modules::app_title::{AppTitle, AppTitleInput};
+use crate::modules::workspaces::{Workspaces, WorkspacesConfig, WorkspacesInput};
 use relm4::adw::prelude::*;
 use relm4::prelude::*;
 use relm4::{
@@ -12,7 +13,7 @@ use super::config::*;
 
 pub struct Bar {
     config: Config,
-    controllers: Vec::<ModuleController>
+    controllers: Vec<ModuleController>,
 }
 
 #[derive(Debug)]
@@ -20,26 +21,31 @@ pub enum BarInput {
     ChangePosition(BarPosition),
     ChangeMargin(BarMargin),
     ChangeBorderRadius(i32),
-    CompositorOutput(CompositorOutput)
+    CompositorOutput(CompositorOutput),
 }
 
 enum ModuleController {
-    WorkspacesController(Controller<Workspaces>)
+    WorkspacesController(Controller<Workspaces>),
+    AppTitleContoller(Controller<AppTitle>),
 }
 
-pub struct BarWidgets {
-    center_box: gtk::CenterBox,
-}
+pub struct BarWidgets {}
 
 impl Bar {
-    fn module_controller_from_name(name: ModuleName, _sender: &ComponentSender<Self>) -> (ModuleController, impl IsA<gtk::Widget>) {
+    fn module_controller_from_name(
+        name: ModuleName,
+        _sender: &ComponentSender<Self>,
+    ) -> (ModuleController, impl IsA<gtk::Widget>) {
         match name {
-            _ => {
-                let controller = Workspaces::builder()
-                .launch(WorkspacesConfig{}).detach();
+            ModuleName::Workspaces => {
+                let controller = Workspaces::builder().launch(WorkspacesConfig {}).detach();
                 let widget = controller.widget().to_owned();
                 (ModuleController::WorkspacesController(controller), widget)
-
+            }
+            ModuleName::AppTitle => {
+                let controller = AppTitle::builder().launch(()).detach();
+                let widget = controller.widget().to_owned();
+                (ModuleController::AppTitleContoller(controller), widget)
             }
         }
     }
@@ -68,6 +74,9 @@ impl Bar {
         }}
         .workspaces {{
             padding: 0 8px;
+        }}
+        .app-title {{
+            padding: 0 10px;
         }}
 
         checkbutton radio {{
@@ -150,7 +159,10 @@ impl SimpleComponent for Bar {
         window: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> relm4::ComponentParts<Self> {
-        let mut model = Bar { config, controllers: vec![] };
+        let mut model = Bar {
+            config,
+            controllers: vec![],
+        };
 
         model.set_style();
 
@@ -208,24 +220,24 @@ impl SimpleComponent for Bar {
 
         let compositor: WorkerController<Compositor> = Compositor::builder()
             .detach_worker(())
-            .forward(sender.input_sender(), |msg| {
-                BarInput::CompositorOutput(msg)
-            });
+            .forward(sender.input_sender(), |msg| BarInput::CompositorOutput(msg));
 
+        // Start listening to Hyprland compositor's socket in different thread
         let _ = compositor.sender().send(CompositorInput::StartListening);
 
-
+        let start_box = gtk::Box::new(gtk::Orientation::Horizontal, 2);
         for module_name in &model.config.modules.start_modules {
-            let (controller, widget) = Bar::module_controller_from_name(module_name.to_owned(), &sender);
+            let (controller, widget) =
+                Bar::module_controller_from_name(module_name.to_owned(), &sender);
             model.controllers.push(controller);
-            center_box.set_start_widget(Some(&Bar::wrap_module(&widget)));
+
+            start_box.append(&Bar::wrap_module(&widget))
         }
+        center_box.set_start_widget(Some(&start_box));
 
         window.set_content(Some(&center_box));
 
-        let widgets = BarWidgets {
-            center_box,
-        };
+        let widgets = BarWidgets {};
 
         ComponentParts { model, widgets }
     }
@@ -235,13 +247,21 @@ impl SimpleComponent for Bar {
         match message {
             BarInput::CompositorOutput(output) => {
                 for controller in &self.controllers {
-                    if let ModuleController::WorkspacesController(workspace_controller) = controller {
-                        workspace_controller.sender().send(crate::modules::workspaces::WorkspacesInput::CompositorOutput(output.to_owned()));
+                    match controller {
+                        ModuleController::WorkspacesController(controller) => {
+                            let _ = controller
+                                .sender()
+                                .send(WorkspacesInput::CompositorOutput(output.to_owned()));
+                        }
+                        ModuleController::AppTitleContoller(controller) => {
+                            let _ = controller
+                                .sender()
+                                .send(AppTitleInput::CompositorOutput(output.to_owned()));
+                        }
                     }
                 }
             }
-            _ => {
-            }
+            _ => {}
         }
     }
 

@@ -1,6 +1,2 @@
+pub mod app_title;
 pub mod workspaces;
-
-#[derive(Debug)]
-pub enum Module {
-    Workspaces(workspaces::Workspaces)
-}

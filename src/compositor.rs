@@ -1,10 +1,10 @@
 // This file contains a worker to read hyprland socket and send signals
+use crate::common::execute_command;
 use relm4::{ComponentSender, Worker};
+use serde_json::Value;
 use std::env;
 use std::io::{BufRead, BufReader};
 use std::os::unix::net::UnixStream;
-use crate::common::execute_command;
-use serde_json::Value;
 
 #[derive(Debug, Clone)]
 pub enum CompositorOutput {
@@ -26,9 +26,9 @@ impl Compositor {
         let json = execute_command("hyprctl activewindow -j");
 
         if let Ok(parsed) = serde_json::from_str::<Value>(&json) {
-            return parsed["title"].to_string()
+            return String::from(parsed["class"].as_str().unwrap_or(""));
         } else {
-            return String::new()
+            return String::new();
         }
     }
 
@@ -47,7 +47,6 @@ impl Compositor {
                         }
                     }
                 }
-
             }
         }
 
@@ -62,7 +61,7 @@ impl Compositor {
         if let Ok(parsed) = serde_json::from_str::<Value>(&json) {
             return parsed["id"].as_i64().unwrap_or(0).try_into().unwrap_or(0);
         } else {
-            return 0
+            return 0;
         }
     }
 
@@ -108,9 +107,17 @@ impl Worker for Compositor {
                                                 .parse()
                                                 .ok()
                                                 .map(CompositorOutput::ActiveWorkspace),
-                                            ["activewindow", value] => Some(
-                                                CompositorOutput::ActiveWindow(value.to_string()),
-                                            ),
+                                            ["activewindow", value] => {
+                                                let split: Vec<&str> =
+                                                    value.splitn(2, ",").collect();
+                                                Some(CompositorOutput::ActiveWindow(
+                                                    if split.len() > 0 {
+                                                        split[0].to_string()
+                                                    } else {
+                                                        "-".to_string()
+                                                    },
+                                                ))
+                                            }
                                             ["createworkspace", num] => num
                                                 .parse()
                                                 .ok()

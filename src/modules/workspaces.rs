@@ -1,7 +1,10 @@
-use relm4::{gtk::{prelude::*, glib::SignalHandlerId}, RelmRemoveAllExt};
+use crate::compositor::{Compositor, CompositorOutput};
 use gtk::glib::clone;
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
-use crate::compositor::{Compositor, CompositorOutput};
+use relm4::{
+    gtk::{glib::SignalHandlerId, prelude::*},
+    RelmRemoveAllExt,
+};
 
 #[tracker::track]
 #[derive(Debug)]
@@ -12,22 +15,25 @@ pub struct Workspaces {
 
 #[derive(Debug)]
 pub enum WorkspacesInput {
-    CompositorOutput(CompositorOutput)
+    CompositorOutput(CompositorOutput),
 }
 
 pub struct WorkspacesWidgets {
     buttons_container: gtk::Box,
-    radio_buttons: Vec::<gtk::CheckButton>,
+    radio_buttons: Vec<gtk::CheckButton>,
     // Signal handlers are stored to block the signal
     // that changes current workspace when the state of the toggle button is changed
     // programatically which could cause a loop
-    signal_handler_ids: Vec::<SignalHandlerId>
+    signal_handler_ids: Vec<SignalHandlerId>,
 }
 
 pub struct WorkspacesConfig {}
 
 impl Workspaces {
-    fn generate_buttons(&self, container: &gtk::Box) -> (Vec::<gtk::CheckButton>, Vec::<SignalHandlerId>) {
+    fn generate_buttons(
+        &self,
+        container: &gtk::Box,
+    ) -> (Vec<gtk::CheckButton>, Vec<SignalHandlerId>) {
         let mut buttons = vec![];
         let mut signal_handler_ids = vec![];
 
@@ -37,7 +43,7 @@ impl Workspaces {
         container.append(&hidden_radio_button);
 
         for workspace in &self.workspaces {
-            let workspace  = workspace.clone();
+            let workspace = workspace.clone();
 
             let radio_button = gtk::CheckButton::new();
             if workspace == self.active_workspace {
@@ -45,11 +51,12 @@ impl Workspaces {
             }
             radio_button.set_group(Some(&hidden_radio_button));
 
-            let signal_handler_id = radio_button.connect_toggled(clone!(@strong workspace => move |btn| {
-                if btn.is_active() {
-                    Compositor::set_active_workspace(workspace);
-                }
-            }));
+            let signal_handler_id =
+                radio_button.connect_toggled(clone!(@strong workspace => move |btn| {
+                    if btn.is_active() {
+                        Compositor::set_active_workspace(workspace);
+                    }
+                }));
 
             container.append(&radio_button);
             buttons.push(radio_button);
@@ -58,7 +65,6 @@ impl Workspaces {
 
         (buttons, signal_handler_ids)
     }
-
 }
 
 impl SimpleComponent for Workspaces {
@@ -83,58 +89,61 @@ impl SimpleComponent for Workspaces {
         let model = Workspaces {
             workspaces: Compositor::get_workspaces(),
             active_workspace: Compositor::get_active_workspace(),
-            tracker: 0
+            tracker: 0,
         };
-            
+
         let buttons_container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
         let (radio_buttons, signal_handler_ids) = model.generate_buttons(&buttons_container);
 
-        
         root_box.append(&buttons_container);
 
-        let widgets = WorkspacesWidgets { buttons_container, radio_buttons, signal_handler_ids };
+        let widgets = WorkspacesWidgets {
+            buttons_container,
+            radio_buttons,
+            signal_handler_ids,
+        };
 
         ComponentParts { model, widgets }
     }
 
     /// Update model based on message
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
-        self.reset(); 
+        self.reset();
         match message {
-            WorkspacesInput::CompositorOutput(output) => {
-                match output {
-                    CompositorOutput::ActiveWorkspace(active_workspace) => {
-                        self.set_active_workspace(active_workspace);
-                    }
-                    CompositorOutput::CreateWorkspace(workspace) => {
-                        let workspaces = self.get_workspaces();
-                        let mut workspaces = workspaces.to_owned();
-                        workspaces.push(workspace);
-                        workspaces.sort();
+            WorkspacesInput::CompositorOutput(output) => match output {
+                CompositorOutput::ActiveWorkspace(active_workspace) => {
+                    self.set_active_workspace(active_workspace);
+                }
+                CompositorOutput::CreateWorkspace(workspace) => {
+                    let workspaces = self.get_workspaces();
+                    let mut workspaces = workspaces.to_owned();
+                    workspaces.push(workspace);
+                    workspaces.sort();
+                    self.set_workspaces(workspaces);
+                }
+                CompositorOutput::DestroyWorkspace(workspace) => {
+                    let workspaces = self.get_workspaces();
+                    let mut workspaces = workspaces.to_owned();
+
+                    let index = self.workspaces.iter().position(|&w| w == workspace);
+                    if let Some(index) = index {
+                        workspaces.remove(index);
                         self.set_workspaces(workspaces);
                     }
-                    CompositorOutput::DestroyWorkspace(workspace) => {
-                        let workspaces = self.get_workspaces();
-                        let mut workspaces = workspaces.to_owned();
-
-                        let index = self.workspaces.iter().position(|&w| {w == workspace});
-                        if let Some(index) = index {
-                            workspaces.remove(index);
-                            self.set_workspaces(workspaces);
-                        }
-
-                    }
-                    _ => {}
                 }
-            }
+                _ => {}
+            },
         }
     }
 
     /// Update the view to represent the updated model.
     fn update_view(&self, widgets: &mut Self::Widgets, _sender: ComponentSender<Self>) {
         if self.changed(Workspaces::active_workspace()) {
-            let index = self.workspaces.iter().position(|&w| {w == self.active_workspace});
+            let index = self
+                .workspaces
+                .iter()
+                .position(|&w| w == self.active_workspace);
             if let Some(index) = index {
                 let signal_handler_id = &widgets.signal_handler_ids[index];
                 let radio_button = &widgets.radio_buttons[index];
@@ -146,7 +155,8 @@ impl SimpleComponent for Workspaces {
 
         if self.changed(Workspaces::workspaces()) {
             widgets.buttons_container.remove_all();
-            (widgets.radio_buttons, widgets.signal_handler_ids) = self.generate_buttons(&widgets.buttons_container);
+            (widgets.radio_buttons, widgets.signal_handler_ids) =
+                self.generate_buttons(&widgets.buttons_container);
         }
     }
 }

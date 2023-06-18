@@ -17,6 +17,7 @@ pub enum BarPosition {
 #[derive(Debug, Clone)]
 pub enum ModuleName {
     Workspaces,
+    AppTitle,
 }
 
 #[derive(Debug, Clone)]
@@ -55,7 +56,7 @@ impl Default for Config {
                 position: BarPosition::Top,
             },
             modules: Modules {
-                start_modules: vec![ModuleName::Workspaces],
+                start_modules: vec![ModuleName::Workspaces, ModuleName::AppTitle],
                 center_modules: vec![],
                 end_modules: vec![],
             },
