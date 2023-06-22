@@ -18,6 +18,7 @@ pub enum BarPosition {
 pub enum ModuleName {
     Workspaces,
     AppTitle,
+    Calendar,
 }
 
 #[derive(Debug, Clone)]
@@ -57,7 +58,7 @@ impl Default for Config {
             },
             modules: Modules {
                 start_modules: vec![ModuleName::Workspaces, ModuleName::AppTitle],
-                center_modules: vec![],
+                center_modules: vec![ModuleName::Calendar],
                 end_modules: vec![],
             },
         }

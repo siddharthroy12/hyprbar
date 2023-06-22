@@ -1,6 +1,7 @@
 use crate::compositor::{Compositor, CompositorInput, CompositorOutput};
 use crate::config::BarPosition;
 use crate::modules::app_title::{AppTitle, AppTitleInput};
+use crate::modules::calendar::Calendar;
 use crate::modules::workspaces::{Workspaces, WorkspacesConfig, WorkspacesInput};
 use relm4::adw::prelude::*;
 use relm4::prelude::*;
@@ -27,6 +28,7 @@ pub enum BarInput {
 enum ModuleController {
     WorkspacesController(Controller<Workspaces>),
     AppTitleContoller(Controller<AppTitle>),
+    CalendarController(Controller<Calendar>),
 }
 
 pub struct BarWidgets {}
@@ -46,6 +48,11 @@ impl Bar {
                 let controller = AppTitle::builder().launch(()).detach();
                 let widget = controller.widget().to_owned();
                 (ModuleController::AppTitleContoller(controller), widget)
+            }
+            ModuleName::Calendar => {
+                let controller = Calendar::builder().launch(()).detach();
+                let widget = controller.widget().to_owned();
+                (ModuleController::CalendarController(controller), widget)
             }
         }
     }
@@ -72,10 +79,15 @@ impl Bar {
             margin: 5px;
             border-radius: {}px;
         }}
+
         .workspaces {{
             padding: 0 8px;
         }}
         .app-title {{
+            padding: 0 10px;
+        }}
+        .calendar-toggle-button {{
+            background: transparent;
             padding: 0 10px;
         }}
 
@@ -216,24 +228,39 @@ impl SimpleComponent for Bar {
             model.config.bar.margin.bottom,
         );
 
+        // This will contain all the modules
         let center_box = gtk::CenterBox::new();
 
+        // A worker widget to listen to Hyprland socket in a different thread
         let compositor: WorkerController<Compositor> = Compositor::builder()
             .detach_worker(())
             .forward(sender.input_sender(), |msg| BarInput::CompositorOutput(msg));
 
-        // Start listening to Hyprland compositor's socket in different thread
+        // Start listening
         let _ = compositor.sender().send(CompositorInput::StartListening);
 
-        let start_box = gtk::Box::new(gtk::Orientation::Horizontal, 2);
-        for module_name in &model.config.modules.start_modules {
-            let (controller, widget) =
-                Bar::module_controller_from_name(module_name.to_owned(), &sender);
-            model.controllers.push(controller);
+        // Setup modules for start, center end
+        let mut modules: Vec<Vec<ModuleName>> = vec![];
+        modules.push(model.config.modules.start_modules.to_owned());
+        modules.push(model.config.modules.center_modules.to_owned());
+        modules.push(model.config.modules.end_modules.to_owned());
 
-            start_box.append(&Bar::wrap_module(&widget))
+        let mut side_boxes: Vec<gtk::Box> = vec![];
+
+        for side in modules {
+            let side_box = gtk::Box::new(gtk::Orientation::Horizontal, 2);
+            for module_name in side {
+                let (controller, widget) =
+                    Bar::module_controller_from_name(module_name.to_owned(), &sender);
+                model.controllers.push(controller);
+                side_box.append(&Bar::wrap_module(&widget))
+            }
+            side_boxes.push(side_box);
         }
-        center_box.set_start_widget(Some(&start_box));
+
+        center_box.set_start_widget(Some(&side_boxes[0]));
+        center_box.set_center_widget(Some(&side_boxes[1]));
+        //center_box.set_end_widget(Some(&side_boxes[2]));
 
         window.set_content(Some(&center_box));
 
@@ -258,6 +285,7 @@ impl SimpleComponent for Bar {
                                 .sender()
                                 .send(AppTitleInput::CompositorOutput(output.to_owned()));
                         }
+                        _ => {}
                     }
                 }
             }
