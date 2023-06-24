@@ -19,6 +19,7 @@ pub enum ModuleName {
     Workspaces,
     AppTitle,
     Calendar,
+    PowerMenu
 }
 
 #[derive(Debug, Clone)]
@@ -59,7 +60,7 @@ impl Default for Config {
             modules: Modules {
                 start_modules: vec![ModuleName::Workspaces, ModuleName::AppTitle],
                 center_modules: vec![ModuleName::Calendar],
-                end_modules: vec![],
+                end_modules: vec![ModuleName::PowerMenu],
             },
         }
     }

@@ -1,6 +1,6 @@
 use chrono::{DateTime, Local};
 use relm4::gtk::prelude::*;
-use relm4::{gtk, Component, ComponentParts, ComponentSender};
+use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmWidgetExt};
 use std::{thread, time};
 
 #[derive(Debug, Clone)]
@@ -28,7 +28,7 @@ impl Component for Calendar {
     view! {
         gtk::Box {
             gtk::Button {
-                set_css_classes: &["calendar-toggle-button"],
+                inline_css: "background: transparent; padding: 0px 10px",
                 gtk::Label {
                     #[watch]
                     set_label: &model.current_time.format("%d %b %I:%M %p").to_string()

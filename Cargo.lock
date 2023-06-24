@@ -570,6 +570,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "hyprbar"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "gtk4-layer-shell",
+ "relm4",
+ "relm4-components",
+ "serde_json",
+ "tracker",
+]
+
+[[package]]
 name = "iana-time-zone"
 version = "0.1.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -875,18 +887,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.18",
-]
-
-[[package]]
-name = "rust_playground"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "gtk4-layer-shell",
- "relm4",
- "relm4-components",
- "serde_json",
- "tracker",
 ]
 
 [[package]]

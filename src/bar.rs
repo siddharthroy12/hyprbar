@@ -2,6 +2,7 @@ use crate::compositor::{Compositor, CompositorInput, CompositorOutput};
 use crate::config::BarPosition;
 use crate::modules::app_title::{AppTitle, AppTitleInput};
 use crate::modules::calendar::Calendar;
+use crate::modules::power_menu::PowerMenu;
 use crate::modules::workspaces::{Workspaces, WorkspacesConfig, WorkspacesInput};
 use relm4::adw::prelude::*;
 use relm4::prelude::*;
@@ -29,6 +30,7 @@ enum ModuleController {
     WorkspacesController(Controller<Workspaces>),
     AppTitleContoller(Controller<AppTitle>),
     CalendarController(Controller<Calendar>),
+    PowerMenuController(Controller<PowerMenu>)
 }
 
 pub struct BarWidgets {}
@@ -53,6 +55,11 @@ impl Bar {
                 let controller = Calendar::builder().launch(()).detach();
                 let widget = controller.widget().to_owned();
                 (ModuleController::CalendarController(controller), widget)
+            }
+            ModuleName::PowerMenu => {
+                let controller = PowerMenu::builder().launch(()).detach();
+                let widget = controller.widget().to_owned();
+                (ModuleController::PowerMenuController(controller), widget)
             }
         }
     }
@@ -86,11 +93,6 @@ impl Bar {
         .app-title {{
             padding: 0 10px;
         }}
-        .calendar-toggle-button {{
-            background: transparent;
-            padding: 0 10px;
-        }}
-
         checkbutton radio {{
             min-width: 8px;
             min-height: 8px;
@@ -157,7 +159,7 @@ impl SimpleComponent for Bar {
         gtk4_layer_shell::init_for_window(&window);
 
         // Display above normal windows
-        gtk4_layer_shell::set_layer(&window, gtk4_layer_shell::Layer::Overlay);
+        gtk4_layer_shell::set_layer(&window, gtk4_layer_shell::Layer::Top);
 
         // Push other windows out of the way
         gtk4_layer_shell::auto_exclusive_zone_enable(&window);
@@ -260,7 +262,7 @@ impl SimpleComponent for Bar {
 
         center_box.set_start_widget(Some(&side_boxes[0]));
         center_box.set_center_widget(Some(&side_boxes[1]));
-        //center_box.set_end_widget(Some(&side_boxes[2]));
+        center_box.set_end_widget(Some(&side_boxes[2]));
 
         window.set_content(Some(&center_box));
 
