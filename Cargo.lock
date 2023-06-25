@@ -575,7 +575,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "gtk4-layer-shell",
- "relm4",
+ "relm4 0.6.0 (git+https://github.com/Relm4/relm4?branch=fix-template-children)",
  "relm4-components",
  "serde_json",
  "tracker",
@@ -862,7 +862,24 @@ dependencies = [
  "gtk4",
  "libadwaita",
  "once_cell",
- "relm4-macros",
+ "relm4-macros 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "relm4"
+version = "0.6.0"
+source = "git+https://github.com/Relm4/relm4?branch=fix-template-children#0acfe2c4ff06dfde0355b0bbb31b2c45c0bc0be4"
+dependencies = [
+ "async-trait",
+ "flume",
+ "fragile",
+ "futures",
+ "gtk4",
+ "libadwaita",
+ "once_cell",
+ "relm4-macros 0.6.0 (git+https://github.com/Relm4/relm4?branch=fix-template-children)",
  "tokio",
  "tracing",
 ]
@@ -874,7 +891,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "29a7265580b2a185254b9f129bff5fdca11a00730a6e075628c93502a4eced81"
 dependencies = [
  "once_cell",
- "relm4",
+ "relm4 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tracker",
 ]
 
@@ -883,6 +900,16 @@ name = "relm4-macros"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "848a6e1b4954b7aa8155d4a234516d46ed543a614666adc1ea73a922bc841e2a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.18",
+]
+
+[[package]]
+name = "relm4-macros"
+version = "0.6.0"
+source = "git+https://github.com/Relm4/relm4?branch=fix-template-children#0acfe2c4ff06dfde0355b0bbb31b2c45c0bc0be4"
 dependencies = [
  "proc-macro2",
  "quote",

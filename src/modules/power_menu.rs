@@ -19,21 +19,18 @@ impl WidgetTemplate for MenuButton {
     view! {
         gtk::Button {
             add_css_class: "flat",
+            gtk::Box {
+                set_orientation: gtk::Orientation::Horizontal,
+                set_spacing: 10,
+                #[name = "image"]
+                gtk::Image {},
+                #[name = "label"]
+                gtk::Label {}
+            }
         }
 
     }
 }
-
-#[relm4::widget_template(pub)]
-impl WidgetTemplate for MenuButtonBox {
-    view! {
-        gtk::Box {
-            set_orientation: gtk::Orientation::Horizontal,
-            set_spacing: 10,
-        }
-    }
-}
-
 
 #[relm4::component(pub)]
 impl SimpleComponent for PowerMenu {
@@ -63,21 +60,27 @@ impl SimpleComponent for PowerMenu {
                         connect_clicked: |_| {
                             execute_command("shutdown now");
                         },
-                        #[template]
-                        MenuButtonBox {
-                            gtk::Image::from_icon_name("system-shutdown-symbolic") {},
-                            gtk::Label::new(Some("Shutdown")) {}
+                        #[template_child]
+                        image {
+                            set_from_icon_name: Some("system-shutdown-symbolic"),
                         },
+                        #[template_child]
+                        label {
+                            set_label: "Shutdown"
+                        }
                     },
                     #[template]
                     MenuButton {
                         connect_clicked: |_| {
                             execute_command("reboot");
                         },
-                        #[template]
-                        MenuButtonBox {
-                            gtk::Image::from_icon_name("system-reboot-symbolic") {},
-                            gtk::Label::new(Some("Reboot")) {}
+                        #[template_child]
+                        image {
+                            set_from_icon_name: Some("system-reboot-symbolic"),
+                        },
+                        #[template_child]
+                        label {
+                            set_label: "Reboot"
                         }
                     },
                     #[template]
@@ -85,10 +88,13 @@ impl SimpleComponent for PowerMenu {
                         connect_clicked: |_| {
                             execute_command("hyprctl dispatch exit");
                         },
-                        #[template]
-                        MenuButtonBox {
-                            gtk::Image::from_icon_name("system-log-out-symbolic") {},
-                            gtk::Label::new(Some("Logout")) {}
+                        #[template_child]
+                        image {
+                            set_from_icon_name: Some("system-log-out-symbolic"),
+                        },
+                        #[template_child]
+                        label {
+                            set_label: "Logout"
                         }
                     },
                     #[template]
@@ -96,10 +102,13 @@ impl SimpleComponent for PowerMenu {
                         connect_clicked: |_| {
                             execute_command("systemctl suspend");
                         },
-                        #[template]
-                        MenuButtonBox {
-                            gtk::Image::from_icon_name("weather-clear-night-symbolic") {},
-                            gtk::Label::new(Some("Sleep")) {}
+                        #[template_child]
+                        image {
+                            set_from_icon_name: Some("weather-clear-night-symbolic"),
+                        },
+                        #[template_child]
+                        label {
+                            set_label: "Sleep"
                         }
                     }
 
