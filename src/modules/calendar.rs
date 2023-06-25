@@ -39,21 +39,23 @@ impl Component for Calendar {
             },
             #[name = "popover"]
             gtk::Popover {
+                set_css_classes: &["popover-padding"],
                 set_has_arrow: false,
-                set_offset: (0, 8),
                 gtk::Box {
-                    set_orientation: gtk::Orientation::Vertical,
-                    gtk::Label {
-                        set_css_classes: &["title-1", "big-date-time"],
-                        #[watch]
-                        set_label: &model.current_time.format("%I : %M").to_string()
-                    },
-                    gtk::Label {
-                        set_css_classes: &["title-4", "full-date"],
-                        #[watch]
-                        set_label: &model.current_time.format("%A, %d %B").to_string()
-                    },
-                    gtk::Calendar {}
+                    gtk::Box {
+                        set_orientation: gtk::Orientation::Vertical,
+                        gtk::Label {
+                            set_css_classes: &["title-1", "big-date-time"],
+                            #[watch]
+                            set_label: &model.current_time.format("%I : %M").to_string()
+                        },
+                        gtk::Label {
+                            set_css_classes: &["title-4", "full-date"],
+                            #[watch]
+                            set_label: &model.current_time.format("%A, %d %B").to_string()
+                        },
+                        gtk::Calendar {}
+                    }
                 }
             }
         }

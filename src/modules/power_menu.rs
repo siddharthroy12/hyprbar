@@ -51,8 +51,8 @@ impl SimpleComponent for PowerMenu {
             },
             #[name = "popover"]
             gtk::Popover {
+                set_css_classes: &["popover-padding"],
                 set_has_arrow: false,
-                set_offset: (-44, 8),
                 gtk::Box {
                     set_orientation: gtk::Orientation::Vertical,
                     #[template]

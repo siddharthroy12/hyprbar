@@ -86,7 +86,9 @@ impl Bar {
             margin: 5px;
             border-radius: {}px;
         }}
-
+        .popover-padding {{
+            padding: 8px;
+        }}
         .workspaces {{
             padding: 0 8px;
         }}
